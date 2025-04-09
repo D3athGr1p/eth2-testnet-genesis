@@ -240,7 +240,7 @@ func (g *DenebGenesisCmd) Run(ctx context.Context, args ...string) error {
 	}
 
 	state := deneb.NewBeaconStateView(spec)
-	if err := setupState(spec, state, beaconGenesisTimestamp, eth1BlockHash, validators, common.Gwei(g.EffectiveBalance); err != nil {
+	if err := setupState(spec, state, beaconGenesisTimestamp, eth1BlockHash, validators, common.Gwei(g.EffectiveBalance)); err != nil {
 		return err
 	}
 
