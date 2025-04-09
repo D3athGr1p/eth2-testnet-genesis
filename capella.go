@@ -47,6 +47,7 @@ type CapellaGenesisCmd struct {
 	EthWithdrawalAddress common.Eth1Address `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
 	ShadowForkEth1RPC    string             `ask:"--shadow-fork-eth1-rpc" help:"Fetch the Eth1 block from the eth1 node for the shadow fork"`
 	ShadowForkBlockFile  string             `ask:"--shadow-fork-block-file" help:"Fetch the Eth1 block from a file for the shadow fork(overwrites RPC option)"`
+	EffectiveBalance     uint64             `ask:"--max-effective-balance" help:"Set effective balance to be custom instead of default"`
 }
 
 func (g *CapellaGenesisCmd) Help() string {
@@ -66,6 +67,7 @@ func (g *CapellaGenesisCmd) Default() {
 	g.TranchesDir = "tranches"
 	g.ShadowForkEth1RPC = ""
 	g.ShadowForkBlockFile = ""
+	g.EffectiveBalance = 0
 }
 
 func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
@@ -224,7 +226,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		return err
 	}
 
-	validators, err := loadValidatorKeys(spec, g.MnemonicsSrcFilePath, g.ValidatorsSrcFilePath, g.TranchesDir, g.EthWithdrawalAddress)
+	validators, err := loadValidatorKeys(spec, g.MnemonicsSrcFilePath, g.ValidatorsSrcFilePath, g.TranchesDir, g.EthWithdrawalAddress, common.Gwei(g.EffectiveBalance))
 	if err != nil {
 		return err
 	}
@@ -234,7 +236,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 	}
 
 	state := capella.NewBeaconStateView(spec)
-	if err := setupState(spec, state, beaconGenesisTimestamp, eth1BlockHash, validators); err != nil {
+	if err := setupState(spec, state, beaconGenesisTimestamp, eth1BlockHash, validators, common.Gwei(g.EffectiveBalance)); err != nil {
 		return err
 	}
 

@@ -14,7 +14,7 @@ import (
 )
 
 func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Timestamp,
-	eth1BlockHash common.Root, validators []phase0.KickstartValidatorData) error {
+	eth1BlockHash common.Root, validators []phase0.KickstartValidatorData, effectiveBalance common.Gwei) error {
 
 	if err := state.SetGenesisTime(eth1Time + spec.GENESIS_DELAY); err != nil {
 		return err
@@ -93,6 +93,7 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	}
 
 	for _, v := range validators {
+		v.Balance = effectiveBalance
 		if err := state.AddValidator(spec, v.Pubkey, v.WithdrawalCredentials, v.Balance); err != nil {
 			return err
 		}
@@ -107,11 +108,19 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 		if err != nil {
 			return err
 		}
+		if uint64(effectiveBalance) > 0 {
+			val.SetEffectiveBalance(effectiveBalance)
+		}
 		vEff, err := val.EffectiveBalance()
 		if err != nil {
 			return err
 		}
-		if vEff == spec.MAX_EFFECTIVE_BALANCE {
+
+		maxEffectiveBalance := spec.MAX_EFFECTIVE_BALANCE
+		if uint64(effectiveBalance) > 0 {
+			maxEffectiveBalance = effectiveBalance
+		}
+		if vEff == maxEffectiveBalance {
 			if err := val.SetActivationEligibilityEpoch(common.GENESIS_EPOCH); err != nil {
 				return err
 			}
@@ -129,7 +138,7 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 			return err
 		}
 		active := common.ActiveIndices(indicesBounded, common.GENESIS_EPOCH)
-		indices, err := common.ComputeSyncCommitteeIndices(spec, state, common.GENESIS_EPOCH, active)
+		indices, err := common.ComputeSyncCommitteeIndices(spec, state, common.GENESIS_EPOCH, active, effectiveBalance)
 		if err != nil {
 			return fmt.Errorf("failed to compute sync committee indices: %v", err)
 		}

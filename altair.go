@@ -25,6 +25,7 @@ type AltairGenesisCmd struct {
 	ValidatorsSrcFilePath string           `ask:"--additional-validators" help:"File with list of validators"`
 	StateOutputPath       string           `ask:"--state-output" help:"Output path for state file"`
 	TranchesDir           string           `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
+	EffectiveBalance      uint64     	   `ask:"--max-effective-balance" help:"Set effective balance to be custom instead of default"`
 
 	EthWithdrawalAddress common.Eth1Address `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
 }
@@ -41,6 +42,7 @@ func (g *AltairGenesisCmd) Default() {
 	g.ValidatorsSrcFilePath = ""
 	g.StateOutputPath = "genesis.ssz"
 	g.TranchesDir = "tranches"
+	g.EffectiveBalance = 0
 }
 
 func (g *AltairGenesisCmd) Run(ctx context.Context, args ...string) error {
@@ -54,7 +56,7 @@ func (g *AltairGenesisCmd) Run(ctx context.Context, args ...string) error {
 		return err
 	}
 
-	validators, err := loadValidatorKeys(spec, g.MnemonicsSrcFilePath, g.ValidatorsSrcFilePath, g.TranchesDir, g.EthWithdrawalAddress)
+	validators, err := loadValidatorKeys(spec, g.MnemonicsSrcFilePath, g.ValidatorsSrcFilePath, g.TranchesDir, g.EthWithdrawalAddress, common.Gwei(g.EffectiveBalance))
 	if err != nil {
 		return err
 	}
@@ -84,7 +86,7 @@ func (g *AltairGenesisCmd) Run(ctx context.Context, args ...string) error {
 		beaconGenesisTimestamp = g.Eth1BlockTimestamp
 	}
 
-	if err := setupState(spec, state, beaconGenesisTimestamp, g.Eth1BlockHash, validators); err != nil {
+	if err := setupState(spec, state, beaconGenesisTimestamp, g.Eth1BlockHash, validators, common.Gwei(g.EffectiveBalance)); err != nil {
 		return err
 	}
 
