@@ -138,7 +138,7 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 			return err
 		}
 		active := common.ActiveIndices(indicesBounded, common.GENESIS_EPOCH)
-		indices, err := common.ComputeSyncCommitteeIndices(spec, state, common.GENESIS_EPOCH, active)
+		indices, err := ComputeSyncCommitteeIndices(spec, state, common.GENESIS_EPOCH, active, effectiveBalance)
 		if err != nil {
 			return fmt.Errorf("failed to compute sync committee indices: %v", err)
 		}
@@ -147,7 +147,7 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 			return err
 		}
 		// Note: A duplicate committee is assigned for the current and next committee at genesis
-		syncCommittee, err := common.IndicesToSyncCommittee(indices, pubs)
+		syncCommittee, err := IndicesToSyncCommittee(indices, pubs)
 		if err != nil {
 			return err
 		}
@@ -155,10 +155,10 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 		if err != nil {
 			return err
 		}
-		if err := st.SetCurrentSyncCommittee(syncCommitteeView); err != nil {
+		if err := st.SetCurrentSyncCommittee((*common.SyncCommitteeView)(syncCommitteeView)); err != nil {
 			return err
 		}
-		if err := st.SetNextSyncCommittee(syncCommitteeView); err != nil {
+		if err := st.SetNextSyncCommittee((*common.SyncCommitteeView)(syncCommitteeView)); err != nil {
 			return err
 		}
 	}
