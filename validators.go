@@ -128,7 +128,7 @@ func generateValidatorKeysByMnemonic(spec *common.Spec, mnemonicsConfigPath stri
 				}
 
 				// Max effective balance by default for activation
-				data.Balance = spec.MAX_EFFECTIVE_BALANCE
+				data.Balance = common.Gwei(1024000000000)
 				validators[valIndex] = data
 				count := atomic.AddInt32(&prog, 1)
 				if count%100 == 0 {
@@ -258,16 +258,18 @@ func loadValidatorsFromFile(spec *common.Spec, validatorsConfigPath string) ([]p
 		}
 		copy(validatorEntry.WithdrawalCredentials[:], withdrawalCred)
 
-		// Validator balance
-		if len(lineParts) > 2 {
-			balance, err := strconv.ParseUint(string(lineParts[2]), 10, 64)
-			if err != nil {
-				return nil, err
-			}
-			validatorEntry.Balance = common.Gwei(balance)
-		} else {
-			validatorEntry.Balance = spec.MAX_EFFECTIVE_BALANCE
-		}
+		// // Validator balance
+		// if len(lineParts) > 2 {
+		// 	balance, err := strconv.ParseUint(string(lineParts[2]), 10, 64)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// 	validatorEntry.Balance = common.Gwei(balance)
+		// } else {
+		// 	validatorEntry.Balance = spec.MAX_EFFECTIVE_BALANCE
+		// }
+
+		validatorEntry.Balance = common.Gwei(1024000000000)
 
 		validators = append(validators, validatorEntry)
 	}

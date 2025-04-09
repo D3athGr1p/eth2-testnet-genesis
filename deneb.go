@@ -264,6 +264,42 @@ func (g *DenebGenesisCmd) Run(ctx context.Context, args ...string) error {
 	if err := state.Serialize(w); err != nil {
 		return err
 	}
+	printBeaconState(state)
 	fmt.Println("done!")
 	return nil
+}
+
+
+func printBeaconState(bs common.BeaconState) {
+	fmt.Println(".....................Beacon State .........................")
+	fmt.Println("Eth1Data:")
+
+	eth1Data, err := bs.Eth1Data()
+	if err != nil {
+		return
+	}
+	validators, err := bs.Validators()
+	if err != nil {
+		return
+	}
+	genesisTime, err := bs.GenesisTime()
+	if err != nil {
+		return
+	}
+	forkVersion, err := bs.Fork()
+	if err != nil {
+		return
+	}
+
+	validatorCount, err := validators.ValidatorCount()
+	if err != nil {
+		return
+	}
+	fmt.Println("BlockHash", fmt.Sprintf("%#x", eth1Data.BlockHash))
+	fmt.Println("DepositRoot", fmt.Sprintf("%#x", eth1Data.DepositRoot))
+	fmt.Println("validatorCount", validatorCount)
+	fmt.Println("genesisTime", genesisTime)
+	fmt.Println("curForkVersion", forkVersion.CurrentVersion)
+	fmt.Println("prevForkVersion", forkVersion.PreviousVersion)
+	fmt.Println(".....................................")
 }
