@@ -294,7 +294,7 @@ func (g *ElectraGenesisCmd) Run(ctx context.Context, args ...string) error {
 	//     print("consolidation_balance_to_consume", consolidation_balance_to_consume)
 	//
 	// At <264k and less validators it doesn't matter.
-	exitBalanceToConsume := common.Gwei(128000000000)
+	exitBalanceToConsume := common.Gwei(50000000000000)
 	consolidationBalanceToConsume := common.Gwei(0)
 	if err := state.SetEarliestExitEpoch(earliestExitEpoch); err != nil {
 		return err
@@ -331,6 +331,7 @@ func (g *ElectraGenesisCmd) Run(ctx context.Context, args ...string) error {
 	if err := state.Serialize(w); err != nil {
 		return err
 	}
+	printBeaconState(state)
 	fmt.Println("done!")
 	return nil
 }
